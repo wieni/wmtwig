@@ -1,0 +1,9 @@
+<?php
+
+/**
+ * Implements hook_theme().
+ */
+function wmtwig_theme()
+{
+    return \Drupal::service('wmtwig.template_locator')->getThemes();
+}
