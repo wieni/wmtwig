@@ -20,3 +20,11 @@ services:
         tags: [{ name: event_subscriber }]
         arguments:
             - '@renderer'
+
+    wmtwig.viewbuilder:
+        class: Drupal\wmcontroller\Service\ViewBuilder
+        shared: false
+        arguments:
+            - '@main_content_renderer.html'
+            - '@request_stack'
+            - '@current_route_match'
