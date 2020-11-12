@@ -24,7 +24,7 @@ class TemplateLocator implements TemplateLocatorInterface
     ) {
         if (empty($settings['module'])) {
             throw new \Exception(
-                'wmtwig requires a non-empty module entry in wmcontroller.settings'
+                'wmtwig requires a non-empty module entry in wmtwig.settings'
             );
         }
 
