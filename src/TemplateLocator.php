@@ -94,7 +94,7 @@ class TemplateLocator implements TemplateLocatorInterface
                 'template' => $fileName,
                 'preprocess functions' => [
                     'template_preprocess',
-                    'wmcontroller_theme_set_variables',
+                    'wmtwig_theme_set_variables',
                 ],
             ];
         }
