@@ -22,7 +22,7 @@ services:
             - '@renderer'
 
     wmtwig.viewbuilder:
-        class: Drupal\wmcontroller\Service\ViewBuilder
+        class: Drupal\wmtwig\ViewBuilder
         shared: false
         arguments:
             - '@main_content_renderer.html'
