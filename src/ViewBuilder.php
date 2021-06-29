@@ -2,7 +2,8 @@
 
 namespace Drupal\wmtwig;
 
-use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Cache\CacheableResponseInterface;
+use Drupal\Core\Cache\CacheableResponseTrait;
 use Drupal\Core\Render\AttachmentsInterface;
 use Drupal\Core\Render\AttachmentsTrait;
 use Drupal\Core\Render\MainContent\MainContentRendererInterface;
@@ -10,9 +11,10 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 
-class ViewBuilder implements AttachmentsInterface
+class ViewBuilder implements AttachmentsInterface, CacheableResponseInterface
 {
     use AttachmentsTrait;
+    use CacheableResponseTrait;
 
     /** @var MainContentRendererInterface */
     protected $renderer;
@@ -27,8 +29,6 @@ class ViewBuilder implements AttachmentsInterface
     protected $template;
     /** @var array */
     protected $data = [];
-    /** @var CacheableMetadata */
-    protected $cacheabilityMetadata;
 
     public function __construct(
         MainContentRendererInterface $renderer,
@@ -38,7 +38,6 @@ class ViewBuilder implements AttachmentsInterface
         $this->renderer = $renderer;
         $this->requestStack = $requestStack;
         $this->routeMatch = $routeMatch;
-        $this->cacheabilityMetadata = new CacheableMetadata();
     }
 
     public function setTemplateDir(?string $templateDir): self
@@ -67,19 +66,6 @@ class ViewBuilder implements AttachmentsInterface
     public function setData(array $data): self
     {
         $this->data = $data;
-
-        return $this;
-    }
-
-    public function getCacheableMetadata(): CacheableMetadata
-    {
-        return $this->cacheabilityMetadata;
-    }
-
-    public function addCacheableDependency($dependency)
-    {
-        $this->cacheabilityMetadata = $this->cacheabilityMetadata
-            ->merge(CacheableMetadata::createFromObject($dependency));
 
         return $this;
     }
