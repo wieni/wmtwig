@@ -3,13 +3,17 @@
 namespace Drupal\wmtwig;
 
 use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Render\AttachmentsInterface;
+use Drupal\Core\Render\AttachmentsTrait;
 use Drupal\Core\Render\MainContent\MainContentRendererInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 
-class ViewBuilder
+class ViewBuilder implements AttachmentsInterface
 {
+    use AttachmentsTrait;
+
     /** @var MainContentRendererInterface */
     protected $renderer;
     /** @var RequestStack */
@@ -105,6 +109,7 @@ class ViewBuilder
     {
         $view = [];
         $view['#_data'] = $this->data;
+        $view['#attached'] = $this->attachments;
 
         if ($this->template) {
             $view['#theme'] =
