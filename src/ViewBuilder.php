@@ -72,21 +72,21 @@ class ViewBuilder implements AttachmentsInterface, CacheableResponseInterface
 
     public function addCacheContexts(string $context): self
     {
-        $this->cacheabilityMetadata->addCacheContexts([$context]);
+        $this->getCacheableMetadata()->addCacheContexts([$context]);
 
         return $this;
     }
 
     public function addCacheTag($tag): self
     {
-        $this->cacheabilityMetadata->addCacheTags([$tag]);
+        $this->getCacheableMetadata()->addCacheTags([$tag]);
 
         return $this;
     }
 
     public function addCacheTags(array $tags): self
     {
-        $this->cacheabilityMetadata->addCacheTags($tags);
+        $this->getCacheableMetadata()->addCacheTags($tags);
 
         return $this;
     }
@@ -103,7 +103,7 @@ class ViewBuilder implements AttachmentsInterface, CacheableResponseInterface
                 $this->template;
         }
 
-        $this->cacheabilityMetadata->applyTo($view);
+        $this->getCacheableMetadata()->applyTo($view);
 
         return $view;
     }
