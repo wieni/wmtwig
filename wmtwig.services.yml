@@ -18,8 +18,6 @@ services:
     wmtwig.subscriber.template_parameter_cacheable_dependency:
         class: Drupal\wmtwig\EventSubscriber\TemplateParameterCacheableDependencySubscriber
         tags: [{ name: event_subscriber }]
-        arguments:
-            - '@renderer'
 
     wmtwig.viewbuilder:
         class: Drupal\wmtwig\ViewBuilder
