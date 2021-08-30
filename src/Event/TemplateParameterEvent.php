@@ -17,8 +17,7 @@ class TemplateParameterEvent extends Event
         $this->value = $value;
     }
 
-    /** @return string */
-    public function getKey()
+    public function getKey(): string
     {
         return $this->key;
     }
@@ -28,7 +27,7 @@ class TemplateParameterEvent extends Event
         return $this->value;
     }
 
-    public function setValue($value)
+    public function setValue($value): void
     {
         $this->value = $value;
     }

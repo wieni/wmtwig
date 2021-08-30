@@ -98,9 +98,9 @@ class ViewBuilder implements AttachmentsInterface, CacheableResponseInterface
         $view['#attached'] = $this->attachments;
 
         if ($this->template) {
-            $view['#theme'] =
-                ($this->templateDir ? $this->templateDir . '.' : '') .
-                $this->template;
+            $view['#theme']
+                = ($this->templateDir ? $this->templateDir . '.' : '')
+                . $this->template;
         }
 
         $this->getCacheableMetadata()->applyTo($view);

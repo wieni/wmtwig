@@ -20,14 +20,14 @@ class TemplateParameterCacheableDependencySubscriber implements EventSubscriberI
         $this->renderer = $renderer;
     }
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         $events[WmTwigEvents::TEMPLATE_PARAMETER][] = ['onTemplateParameter'];
 
         return $events;
     }
 
-    public function onTemplateParameter(TemplateParameterEvent $event)
+    public function onTemplateParameter(TemplateParameterEvent $event): void
     {
         $value = $event->getValue();
         $metadata = new CacheableMetadata();
