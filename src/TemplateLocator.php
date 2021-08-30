@@ -1,7 +1,8 @@
 <?php
 
-namespace Drupal\wmcontroller\Service;
+namespace Drupal\wmtwig;
 
+use Drupal\Core\Extension\ThemeHandlerInterface;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -12,14 +13,18 @@ class TemplateLocator implements TemplateLocatorInterface
 {
     public const TWIG_EXT = '.html.twig';
 
+    /** @var ThemeHandlerInterface */
+    protected $themeHandler;
     /** @var array */
     protected $settings;
 
-    public function __construct(array $settings)
-    {
+    public function __construct(
+        ThemeHandlerInterface $themeHandler,
+        array $settings
+    ) {
         if (empty($settings['module'])) {
             throw new \Exception(
-                'wmcontroller requires a non-empty module entry in wmcontroller.settings'
+                'wmtwig requires a non-empty module entry in wmtwig.settings'
             );
         }
 
@@ -27,17 +32,32 @@ class TemplateLocator implements TemplateLocatorInterface
             $settings['path'] = 'templates';
         }
 
+        $this->themeHandler = $themeHandler;
         $this->settings = $settings;
     }
 
     public function getThemes(): array
     {
-        $type = 'module';
-        if (!empty($this->settings['theme'])) {
-            $type = 'theme';
+        if (empty($this->settings['theme'])) {
+            return $this->getThemeFiles('module', $this->settings['module']);
         }
 
-        return $this->getThemeFiles($type, $this->settings[$type]);
+        $allThemes = $this->themeHandler->listInfo();
+        $activeTheme = $this->settings['theme'];
+
+        $themes = array_keys($this->themeHandler->getBaseThemes($allThemes, $activeTheme));
+        $themes[] = $activeTheme;
+
+        $templates = [];
+        foreach ($themes as $theme) {
+            if (!isset($allThemes[$theme])) {
+                continue;
+            }
+
+            $templates = array_merge($templates, $this->getThemeFiles('theme', $theme));
+        }
+
+        return $templates;
     }
 
     /**
@@ -74,7 +94,7 @@ class TemplateLocator implements TemplateLocatorInterface
                 'template' => $fileName,
                 'preprocess functions' => [
                     'template_preprocess',
-                    'wmcontroller_theme_set_variables',
+                    'wmtwig_theme_set_variables',
                 ],
             ];
         }

@@ -1,15 +1,17 @@
 <?php
 
-namespace Drupal\wmcontroller\Twig;
+namespace Drupal\wmtwig\Twig;
 
-use Drupal\wmcontroller\Event\PresentedEvent;
-use Drupal\wmcontroller\WmcontrollerEvents;
+use Drupal\wmtwig\Event\TemplateParameterEvent;
+use Drupal\wmtwig\WmTwigEvents;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 abstract class Template extends \Twig_Template
 {
-    protected static $dispatched = [];
-
+    /** @var EventDispatcherInterface */
     protected static $dispatcher;
+    /** @var array  */
+    protected static $dispatched = [];
 
     public function display(array $context, array $blocks = [])
     {
@@ -26,30 +28,17 @@ abstract class Template extends \Twig_Template
             }
         }
 
-        foreach ($context as $k => $var) {
-            $event = new PresentedEvent($var);
+        foreach ($context as $key => $value) {
+            $event = new TemplateParameterEvent($key, $value);
             $this->getDispatcher()->dispatch(
-                $event,
-                WmcontrollerEvents::PRESENTED
+                WmTwigEvents::TEMPLATE_PARAMETER,
+                $event
             );
 
-            $context[$k] = $event->getItem();
-
-            if (!($var instanceof \Drupal\Core\Entity\EntityInterface)) {
-                continue;
-            }
-
-            $key = sprintf('%s:%s', $var->getEntityTypeId(), $var->id());
-            if (isset(self::$dispatched[$key])) {
-                continue;
-            }
-
-            self::$dispatched[$key] = true;
-            \Drupal::service('wmcontroller.cache.dispatcher')
-                ->dispatchPresented($var);
+            $context[$key] = $event->getValue();
         }
 
-        return parent::display($context, $blocks);
+        parent::display($context, $blocks);
     }
 
     protected function getDispatcher()

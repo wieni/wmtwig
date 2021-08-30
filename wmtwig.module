@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * Implements hook_theme().
+ */
+function wmtwig_theme(): array
+{
+    return \Drupal::service('wmtwig.template_locator')->getThemes();
+}
+
+/**
+ * Sets the variables set in a template
+ * @see \Drupal\wmtwig\ViewBuilder::setData
+ */
+function wmtwig_theme_set_variables(array &$variables): void
+{
+    // Skip if no data is set or not set as an array
+    if (!isset($variables['_data']) || !is_array($variables['_data'])) {
+        return;
+    }
+    $variables = array_merge($variables, $variables['_data']);
+    unset($variables['_data']);
+}

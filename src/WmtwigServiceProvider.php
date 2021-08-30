@@ -1,23 +1,19 @@
 <?php
 
-namespace Drupal\wmcontroller;
+namespace Drupal\wmtwig;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\ServiceModifierInterface;
 
-class WmcontrollerServiceProvider implements ServiceModifierInterface
+class WmtwigServiceProvider implements ServiceModifierInterface
 {
     public function alter(ContainerBuilder $container)
     {
-        if ($container->getParameter('wmcontroller.cache.tags')) {
-            $container->removeDefinition('http_middleware.page_cache');
-        }
-
         $container->setParameter(
             'twig.config',
             $container->getParameter('twig.config') +
             [
-                'base_template_class' => '\\Drupal\\wmcontroller\\Twig\\Template',
+                'base_template_class' => '\\Drupal\\wmtwig\\Twig\\Template',
             ]
         );
     }
