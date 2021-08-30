@@ -1,11 +1,22 @@
 <?php
 
 /**
- * Implements hook_theme().
+ * Implements @see hook_theme().
  */
 function wmtwig_theme(): array
 {
     return \Drupal::service('wmtwig.template_locator')->getThemes();
+}
+
+/**
+ * Implements @see hook_page_attachments().
+ */
+function wmtwig_page_attachments(array &$attachments)
+{
+    \Drupal::getContainer()
+        ->get('wmtwig.subscriber.template_parameter_cacheable_dependency')
+        ->getCacheableMetadata()
+        ->applyTo($attachments);
 }
 
 /**

@@ -13,11 +13,14 @@ class TemplateParameterCacheableDependencySubscriber implements EventSubscriberI
 {
     /** @var RendererInterface */
     protected $renderer;
+    /** @var CacheableMetadata */
+    protected $metadata;
 
     public function __construct(
         RendererInterface $renderer
     ) {
         $this->renderer = $renderer;
+        $this->metadata = new CacheableMetadata();
     }
 
     public static function getSubscribedEvents(): array
@@ -30,22 +33,22 @@ class TemplateParameterCacheableDependencySubscriber implements EventSubscriberI
     public function onTemplateParameter(TemplateParameterEvent $event): void
     {
         $value = $event->getValue();
-        $metadata = new CacheableMetadata();
 
         if (is_array($value) && reset($value) instanceof CacheableDependencyInterface) {
             foreach ($value as $subValue) {
                 if ($subValue instanceof CacheableDependencyInterface) {
-                    $metadata->addCacheableDependency($subValue);
+                    $this->metadata->addCacheableDependency($subValue);
                 }
             }
         }
 
         if ($value instanceof CacheableDependencyInterface) {
-            $metadata->addCacheableDependency($value);
+            $this->metadata->addCacheableDependency($value);
         }
+    }
 
-        $build = [];
-        $metadata->applyTo($build);
-        $this->renderer->render($build);
+    public function getCacheableMetadata(): CacheableMetadata
+    {
+        return $this->metadata;
     }
 }
