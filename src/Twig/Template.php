@@ -8,10 +8,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 abstract class Template extends \Twig\Template
 {
-    /** @var EventDispatcherInterface */
-    protected static $dispatcher;
-    /** @var array */
-    protected static $dispatched = [];
+    protected static EventDispatcherInterface $dispatcher;
+    protected static array $dispatched = [];
 
     public function display(array $context, array $blocks = []): void
     {
@@ -31,8 +29,8 @@ abstract class Template extends \Twig\Template
         foreach ($context as $key => $value) {
             $event = new TemplateParameterEvent($key, $value);
             $this->getDispatcher()->dispatch(
-                WmTwigEvents::TEMPLATE_PARAMETER,
-                $event
+                $event,
+                WmTwigEvents::TEMPLATE_PARAMETER
             );
 
             $context[$key] = $event->getValue();

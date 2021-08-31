@@ -2,14 +2,12 @@
 
 namespace Drupal\wmtwig\Event;
 
-use Symfony\Component\EventDispatcher\Event;
+use Drupal\Component\EventDispatcher\Event;
 
 class TemplateParameterEvent extends Event
 {
-    /** @var string */
-    protected $key;
-    /** @var mixed */
-    protected $value;
+    protected string $key;
+    protected mixed $value;
 
     public function __construct(string $key, $value)
     {

@@ -11,7 +11,7 @@ function wmtwig_theme(): array
 /**
  * Implements @see hook_page_attachments().
  */
-function wmtwig_page_attachments(array &$attachments)
+function wmtwig_page_attachments(array &$attachments): void
 {
     \Drupal::getContainer()
         ->get('wmtwig.subscriber.template_parameter_cacheable_dependency')

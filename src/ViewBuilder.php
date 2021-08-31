@@ -16,19 +16,13 @@ class ViewBuilder implements AttachmentsInterface, CacheableResponseInterface
     use AttachmentsTrait;
     use CacheableResponseTrait;
 
-    /** @var MainContentRendererInterface */
-    protected $renderer;
-    /** @var RequestStack */
-    protected $requestStack;
-    /** @var RouteMatchInterface */
-    protected $routeMatch;
+    protected MainContentRendererInterface $renderer;
+    protected RequestStack $requestStack;
+    protected RouteMatchInterface $routeMatch;
 
-    /** @var string */
-    protected $templateDir;
-    /** @var string */
-    protected $template;
-    /** @var array */
-    protected $data = [];
+    protected ?string $templateDir = null;
+    protected ?string $template = null;
+    protected array $data = [];
 
     public function __construct(
         MainContentRendererInterface $renderer,

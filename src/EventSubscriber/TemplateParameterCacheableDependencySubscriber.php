@@ -10,8 +10,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class TemplateParameterCacheableDependencySubscriber implements EventSubscriberInterface
 {
-    /** @var CacheableMetadata */
-    protected $metadata;
+    protected CacheableMetadata $metadata;
 
     public function __construct()
     {

@@ -13,10 +13,8 @@ class TemplateLocator implements TemplateLocatorInterface
 {
     public const TWIG_EXT = '.html.twig';
 
-    /** @var ThemeHandlerInterface */
-    protected $themeHandler;
-    /** @var array */
-    protected $settings;
+    protected ThemeHandlerInterface $themeHandler;
+    protected array $settings;
 
     public function __construct(
         ThemeHandlerInterface $themeHandler,
@@ -133,7 +131,7 @@ class TemplateLocator implements TemplateLocatorInterface
         return $files;
     }
 
-    protected function stripOutTemplatePathAndExtension(string $templatePath, string $file): string
+    protected function stripOutTemplatePathAndExtension(string $templatePath, string $file): ?string
     {
         // Strip out the module path
         $file = str_replace($templatePath . DIRECTORY_SEPARATOR, '', $file);
