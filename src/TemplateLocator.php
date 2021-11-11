@@ -2,85 +2,75 @@
 
 namespace Drupal\wmtwig;
 
+use Drupal\Core\Extension\Extension;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Extension\ThemeHandlerInterface;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use RecursiveRegexIterator;
 use RegexIterator;
 
 class TemplateLocator implements TemplateLocatorInterface
 {
     public const TWIG_EXT = '.html.twig';
 
-    protected ThemeHandlerInterface $themeHandler;
-    protected array $settings;
+    /** @var ModuleHandlerInterface */
+    protected $moduleHandler;
+    /** @var ThemeHandlerInterface */
+    protected $themeHandler;
 
     public function __construct(
-        ThemeHandlerInterface $themeHandler,
-        array $settings
+        ModuleHandlerInterface $moduleHandler,
+        ThemeHandlerInterface $themeHandler
     ) {
-        if (empty($settings['module'])) {
-            throw new \Exception(
-                'wmtwig requires a non-empty module entry in wmtwig.settings'
-            );
-        }
-
-        if (empty($settings['path'])) {
-            $settings['path'] = 'templates';
-        }
-
+        $this->moduleHandler = $moduleHandler;
         $this->themeHandler = $themeHandler;
-        $this->settings = $settings;
     }
 
     public function getThemes(): array
     {
-        if (empty($this->settings['theme'])) {
-            return $this->getThemeFiles('module', $this->settings['module']);
-        }
-
-        $allThemes = $this->themeHandler->listInfo();
-        $activeTheme = $this->settings['theme'];
-
-        $themes = array_keys($this->themeHandler->getBaseThemes($allThemes, $activeTheme));
-        $themes[] = $activeTheme;
-
         $templates = [];
-        foreach ($themes as $theme) {
-            if (!isset($allThemes[$theme])) {
-                continue;
+        $extensions = array_merge(
+            $this->themeHandler->listInfo(),
+            $this->moduleHandler->getModuleList()
+        );
+
+        foreach ($extensions as $extension) {
+            $templatePaths = $extension->info['wmtwig']['templates'] ?? [];
+
+            if (is_string($templatePaths)) {
+                $templatePaths = [$templatePaths];
             }
 
-            $templates = array_merge($templates, $this->getThemeFiles('theme', $theme));
+            foreach ($templatePaths as $templatePath) {
+                $templates = array_merge($templates, $this->getThemeDefinitions($extension, $templatePath));
+            }
         }
 
         return $templates;
     }
 
     /**
-     * Locate and create theme arrays in a module
+     * Create theme definitions based on templates present in modules and themes
      *
-     * @param $type
-     *   module or theme
-     * @param $location
-     *   directory in that module or theme
+     * @param Extension $extension
+     *   The module or theme
+     * @param string $templatePath
+     *   The path to the templates folder, relative to the extension root
      */
-    protected function getThemeFiles(string $type, string $location): array
+    protected function getThemeDefinitions(Extension $extension, string $templatePath): array
     {
         $themes = [];
-        $dir = drupal_get_path($type, $location)
-            . DIRECTORY_SEPARATOR
-            . $this->settings['path'];
+        $path = drupal_get_path($extension->getType(), $extension->getName()) . DIRECTORY_SEPARATOR . $templatePath;
 
-        if (!file_exists($dir)) {
+        if (!file_exists($path)) {
             return $themes;
         }
 
-        $files = $this->findTwigFiles($dir);
+        $files = $this->findTwigFiles($path);
 
         foreach ($files as $file) {
-            $fileName = $this->stripOutTemplatePathAndExtension($dir, $file);
+            $fileName = $this->stripOutTemplatePathAndExtension($path, $file);
             // Transform the filename to a template name
             // node/article/index.html.twig => node.article.index
             $templateName = preg_replace('/\/|\\\/', '.', $fileName);
@@ -88,7 +78,7 @@ class TemplateLocator implements TemplateLocatorInterface
                 'variables' => [
                     '_data' => [],
                 ],
-                'path' => $dir,
+                'path' => $path,
                 'template' => $fileName,
                 'preprocess functions' => [
                     'template_preprocess',
@@ -117,7 +107,7 @@ class TemplateLocator implements TemplateLocatorInterface
         $matches = new RegexIterator(
             $fileIterator,
             '#^.*' . preg_quote(static::TWIG_EXT, '#') . '$#',
-            RecursiveRegexIterator::GET_MATCH
+            RegexIterator::GET_MATCH
         );
 
         // Weed out non-matches
@@ -131,7 +121,7 @@ class TemplateLocator implements TemplateLocatorInterface
         return $files;
     }
 
-    protected function stripOutTemplatePathAndExtension(string $templatePath, string $file): ?string
+    protected function stripOutTemplatePathAndExtension(string $templatePath, string $file): string
     {
         // Strip out the module path
         $file = str_replace($templatePath . DIRECTORY_SEPARATOR, '', $file);

@@ -1,19 +1,9 @@
-parameters:
-    wmtwig.settings:
-        # The module where your templates can be found (optional)
-        module: ''
-        # The theme where your templates can be found (optional)
-        theme: ''
-        # The relative path your templates reside in.
-        # (relative to your module / theme dir)
-        path: 'templates'
-
 services:
     wmtwig.template_locator:
         class: Drupal\wmtwig\TemplateLocator
         arguments:
+            - '@module_handler'
             - '@theme_handler'
-            - '%wmtwig.settings%'
 
     wmtwig.subscriber.template_parameter_cacheable_dependency:
         class: Drupal\wmtwig\EventSubscriber\TemplateParameterCacheableDependencySubscriber
