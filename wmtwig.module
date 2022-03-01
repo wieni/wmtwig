@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\Core\Cache\CacheableMetadata;
+
 /**
  * Implements @see hook_theme().
  */
@@ -16,6 +18,7 @@ function wmtwig_page_attachments(array &$attachments): void
     \Drupal::getContainer()
         ->get('wmtwig.subscriber.template_parameter_cacheable_dependency')
         ->getCacheableMetadata()
+        ->merge(CacheableMetadata::createFromRenderArray($attachments))
         ->applyTo($attachments);
 }
 
