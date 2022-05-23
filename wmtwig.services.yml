@@ -2,8 +2,8 @@ services:
     wmtwig.template_locator:
         class: Drupal\wmtwig\TemplateLocator
         arguments:
-            - '@module_handler'
-            - '@theme_handler'
+            - '@extension.list.module'
+            - '@extension.list.theme'
 
     wmtwig.subscriber.template_parameter_cacheable_dependency:
         class: Drupal\wmtwig\EventSubscriber\TemplateParameterCacheableDependencySubscriber

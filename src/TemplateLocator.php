@@ -3,7 +3,9 @@
 namespace Drupal\wmtwig;
 
 use Drupal\Core\Extension\Extension;
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Extension\ThemeExtensionList;
 use Drupal\Core\Extension\ThemeHandlerInterface;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
@@ -14,36 +16,38 @@ class TemplateLocator implements TemplateLocatorInterface
 {
     public const TWIG_EXT = '.html.twig';
 
-    /** @var ModuleHandlerInterface */
-    protected $moduleHandler;
-    /** @var ThemeHandlerInterface */
-    protected $themeHandler;
+    /** @var ModuleExtensionList */
+    protected $moduleList;
+    /** @var ThemeExtensionList */
+    protected $themeList;
 
     public function __construct(
-        ModuleHandlerInterface $moduleHandler,
-        ThemeHandlerInterface $themeHandler
+        ModuleExtensionList $moduleList,
+        ThemeExtensionList $themeList
     ) {
-        $this->moduleHandler = $moduleHandler;
-        $this->themeHandler = $themeHandler;
+        $this->moduleList = $moduleList;
+        $this->themeList = $themeList;
     }
 
     public function getThemes(): array
     {
         $templates = [];
-        $extensions = array_merge(
-            $this->themeHandler->listInfo(),
-            $this->moduleHandler->getModuleList()
-        );
+        $extensions = [
+            'module' => $this->moduleList->getAllInstalledInfo(),
+            'theme' => $this->themeList->getAllInstalledInfo(),
+        ];
 
-        foreach ($extensions as $extension) {
-            $templatePaths = $extension->info['wmtwig']['templates'] ?? [];
+        foreach ($extensions as $type => $extensionsByType) {
+            foreach ($extensionsByType as $name => $info) {
+                $templatePaths = $info['wmtwig']['templates'] ?? [];
 
-            if (is_string($templatePaths)) {
-                $templatePaths = [$templatePaths];
-            }
+                if (is_string($templatePaths)) {
+                    $templatePaths = [$templatePaths];
+                }
 
-            foreach ($templatePaths as $templatePath) {
-                $templates = array_merge($templates, $this->getThemeDefinitions($extension, $templatePath));
+                foreach ($templatePaths as $templatePath) {
+                    $templates = array_merge($templates, $this->getThemeDefinitions($type, $name, $templatePath));
+                }
             }
         }
 
@@ -58,10 +62,10 @@ class TemplateLocator implements TemplateLocatorInterface
      * @param string $templatePath
      *   The path to the templates folder, relative to the extension root
      */
-    protected function getThemeDefinitions(Extension $extension, string $templatePath): array
+    protected function getThemeDefinitions(string $type, string $name, string $templatePath): array
     {
         $themes = [];
-        $path = drupal_get_path($extension->getType(), $extension->getName()) . DIRECTORY_SEPARATOR . $templatePath;
+        $path = drupal_get_path($type, $name) . DIRECTORY_SEPARATOR . $templatePath;
 
         if (!file_exists($path)) {
             return $themes;
