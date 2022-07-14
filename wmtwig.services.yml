@@ -16,3 +16,7 @@ services:
             - '@main_content_renderer.html'
             - '@request_stack'
             - '@current_route_match'
+
+    wmtwig.twig_extension:
+        class: Drupal\wmtwig\Twig\Extension
+        tags: [{ name: twig.extension }]
