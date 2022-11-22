@@ -64,9 +64,16 @@ class ViewBuilder implements AttachmentsInterface, CacheableResponseInterface
         return $this;
     }
 
-    public function addCacheContexts(string $context): self
+    public function addCacheContext(string $context): self
     {
         $this->getCacheableMetadata()->addCacheContexts([$context]);
+
+        return $this;
+    }
+
+    public function addCacheContexts(array $contexts): self
+    {
+        $this->getCacheableMetadata()->addCacheContexts($contexts);
 
         return $this;
     }
