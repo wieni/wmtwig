@@ -18,10 +18,6 @@ class DispatchParameterEventNodeVisitor implements NodeVisitorInterface
      */
     public function enterNode(Node $node, Environment $env): Node
     {
-        if (!$env->isDebug()) {
-            return $node;
-        }
-
         if (!$node instanceof ModuleNode) {
             return $node;
         }
