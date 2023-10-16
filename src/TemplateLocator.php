@@ -65,9 +65,17 @@ class TemplateLocator implements TemplateLocatorInterface
     protected function getThemeDefinitions(string $type, string $name, string $templatePath): array
     {
         $themes = [];
-        $path = drupal_get_path($type, $name) . DIRECTORY_SEPARATOR . $templatePath;
+        $path = null;
 
-        if (!file_exists($path)) {
+        if ($type === 'module') {
+            $path = $this->moduleList->getPath($name) . DIRECTORY_SEPARATOR . $templatePath;
+        }
+
+        if ($type === 'theme') {
+            $path = $this->themeList->getPath($name) . DIRECTORY_SEPARATOR . $templatePath;
+        }
+
+        if ($path === null || !file_exists($path)) {
             return $themes;
         }
 
