@@ -7,6 +7,7 @@ use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Extension\ThemeExtensionList;
 use Drupal\Core\Extension\ThemeHandlerInterface;
+use Drupal\Core\Theme\ThemeManager;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -80,6 +81,7 @@ class TemplateLocator implements TemplateLocatorInterface
         }
 
         $files = $this->findTwigFiles($path);
+        $preprocessFunctions = $this->getPreprocessFunctions();
 
         foreach ($files as $file) {
             $fileName = $this->stripOutTemplatePathAndExtension($path, $file);
@@ -92,14 +94,42 @@ class TemplateLocator implements TemplateLocatorInterface
                 ],
                 'path' => $path,
                 'template' => $fileName,
-                'preprocess functions' => [
-                    'template_preprocess',
-                    'wmtwig_theme_set_variables',
-                ],
+                'preprocess functions' => $preprocessFunctions,
             ];
         }
 
         return $themes;
+    }
+
+    /**
+     * Get the preprocess functions of the theme hooks defined by wmtwig
+     *
+     * Since these theme hooks define their own preprocess functions, core does
+     * not add its default ones. Before Drupal 11.2, template_preprocess() has to
+     * be added explicitly so the default template variables (attributes,
+     * directory, logged_in, ...) are set before the other preprocess functions
+     * run.
+     *
+     * Since Drupal 11.2, ThemeManager::render() sets these variables for every
+     * theme hook before calling any preprocess function. template_preprocess()
+     * is deprecated since then and removed in Drupal 12.
+     *
+     * @see https://www.drupal.org/node/2340341
+     */
+    protected function getPreprocessFunctions(): array
+    {
+        $functions = [];
+
+        if (
+            function_exists('template_preprocess')
+            && !method_exists(ThemeManager::class, 'getDefaultTemplateVariables')
+        ) {
+            $functions[] = 'template_preprocess';
+        }
+
+        $functions[] = 'wmtwig_theme_set_variables';
+
+        return $functions;
     }
 
     /**
