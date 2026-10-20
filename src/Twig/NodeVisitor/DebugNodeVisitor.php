@@ -6,6 +6,7 @@ use Drupal\components\Template\ComponentsRegistry;
 use Twig\Environment;
 use Twig\Node\ModuleNode;
 use Twig\Node\Node;
+use Twig\Node\Nodes;
 use Twig\Node\TextNode;
 use Twig\NodeVisitor\NodeVisitorInterface;
 
@@ -48,8 +49,15 @@ class DebugNodeVisitor implements NodeVisitorInterface
             $nodes[] = new TextNode(sprintf('<!-- Path: %s -->', $path), 0);
         }
 
+        if (class_exists(Nodes::class)) {
+            $nodes = new Nodes($nodes);
+        } else {
+            // BC for Twig < 3.15
+            $nodes = new Node($nodes);
+        }
+
         $node->getNode('display_start')
-            ->setNode('_components_debug', new Node($nodes));
+            ->setNode('_components_debug', $nodes);
 
         return $node;
     }
